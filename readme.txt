@@ -35,3 +35,9 @@ e.g.
 
 1. Upload the entire `market360-viewer` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
+
+== Screenshots ==
+
+1. Presentations list
+2. Presentation edit page
+3. Presentation view
