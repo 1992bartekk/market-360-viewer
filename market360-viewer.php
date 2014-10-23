@@ -6,7 +6,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
  * Plugin Name: Market360 Viewer
  * Plugin URI: http://market360.co/wp-viewer
  * Description: This plugin helps you easly put Market360 presentation on your site using shortcodes.
- * Version: 0.1
+ * Version: 1.0
  * Author: Market360.co
  * Author URI: http://Market360.co
  * License: GPL2
