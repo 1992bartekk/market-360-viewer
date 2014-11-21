@@ -6,7 +6,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
  * Plugin Name: Market360 Viewer
  * Plugin URI: http://market360.co/wp-viewer
  * Description: This plugin helps you easly put Market360 presentation on your site using shortcodes.
- * Version: 1.0
+ * Version: 1.01
  * Author: Market360.co
  * Author URI: http://Market360.co
  * License: GPL2
@@ -536,7 +536,7 @@ function upload_presentation_fn() {
 				$retval .= '<div id="presentationContainer' . $a['id'] . '"></div>';
 				$retval .= '<script>';
 				$retval .= '    app = new presentationLib.Main();';
-				$retval .= '    app.setPresentationPaths( "' . plugins_url() . '/market360-viewer/engine/", "' . $results_from_db->path . '" );';
+				$retval .= '    app.setPresentationPaths( "' . plugins_url() . '/market-360-viewer/engine/", "' . $results_from_db->path . '" );';
 				$retval .= '    app.injectPresentation("presentationContainer' . $a['id'] . '" , ' . $a['w'] .', ' . $a['h'] .');';
 				$retval .= '</script>';
 				return $retval;
@@ -547,7 +547,7 @@ function upload_presentation_fn() {
 		add_shortcode( 'm360', 'market360_viewer_shortcode_fn' );
 
 		function market360_enqueue_script() {
-			wp_enqueue_script( 'market360engine', plugins_url() . '/market360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
+			wp_enqueue_script( 'market360engine', plugins_url() . '/market-360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
 		}
 
 		add_action( 'wp_enqueue_scripts', 'market360_enqueue_script' );

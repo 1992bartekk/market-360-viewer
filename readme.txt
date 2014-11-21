@@ -41,3 +41,9 @@ e.g.
 1. Presentations list
 2. Presentation edit page
 3. Presentation view
+
+== Changelog ==
+
+= 1.01 =
+* Directory name bug fix
+
