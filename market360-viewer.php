@@ -89,14 +89,14 @@ class M360_List_Table extends WP_List_Table {
 function get_columns(){
 	$columns = array(
             //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
-            'thumb'		=> '',
-            'id'		=> 'ID',
-            'name'     	=> 'Name',
-            'width'		=> 'Width',
-            'height'	=> 'Height',
-            'shortcode' => 'Shortcode',
-            'time'  => 'Uploaded'
-            );
+		'thumb'		=> '',
+		'id'		=> 'ID',
+		'name'     	=> 'Name',
+		'width'		=> 'Width',
+		'height'	=> 'Height',
+		'shortcode' => 'Shortcode',
+		'time'  => 'Uploaded'
+		);
 	return $columns;
 }
 
@@ -364,192 +364,192 @@ function upload_presentation_fn() {
 								<?php
 
 							}
-						}else {
-							echo "This presentation is already uploaded.";
-						}
-					}else {
-						echo "Wrong file type. The file have to be .zip archive.";
-					}
+				}else {
+					echo "This presentation is already uploaded.";
 				}
+			}else {
+				echo "Wrong file type. The file have to be .zip archive.";
 			}
+		}
+	}
 
-			echo '<div class="wrap">';
-			echo "<h2>" . __( 'Upload new Market360 presentation', 'market360-viewer' ) . "</h2>";
-			?>
+	echo '<div class="wrap">';
+	echo "<h2>" . __( 'Upload new Market360 presentation', 'market360-viewer' ) . "</h2>";
+	?>
 
-			<form name="form1" method="post" action="" ENCTYPE="multipart/form-data">
-				<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
+	<form name="form1" method="post" action="" ENCTYPE="multipart/form-data">
+		<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
 
-				<p>
-					<input type="file" name="file"/>
-				</p>
-				<p class="submit">
-					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Upload') ?>" />
-				</p>
+		<p>
+			<input type="file" name="file"/>
+		</p>
+		<p class="submit">
+			<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Upload') ?>" />
+		</p>
 
-			</form>
-		</div>
+	</form>
+</div>
 
 		<?php
 
-	}
+}
 
-	function market360_presentation_details_page_callback () {
-		if (!current_user_can('manage_options'))
+function market360_presentation_details_page_callback () {
+if (!current_user_can('manage_options'))
+{
+	wp_die( __('You do not have sufficient permissions to access this page.') );
+}
+
+$id = ( isset($_GET['id'] ) ) ? esc_attr( $_GET['id'] ) : false;
+if( $id == false )
+{
+	?>
+	<div class="wrap">
+		<h2> <?php echo __( 'No presentations found', 'market360-viewer' ); ?></h2>
+	</div>
+	<?php
+	return;
+} 
+
+$hidden_field_name = 'm360_submit_h';
+global $wpdb;
+$table_name = $wpdb->prefix . 'm360_presentations';
+if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
+
+	$w = $_POST['p_width'];
+	$h = $_POST['p_height'];
+	$wpdb->update( 
+		$table_name, 
+		array( 
+			'width' => $w,
+			'height' => $h 
+			), 
+		array( 'ID' => $id )
+		);
+}
+
+
+$results_from_db = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $id");
+if (is_object($results_from_db)){
+
+	if( isset($_GET[ 'action' ]) && $_GET[ 'action' ] == 'delete' ) {
+		if (check_admin_referer( 'delete_presentation_'.$results_from_db->id, 'm360_nonce' ))
 		{
-			wp_die( __('You do not have sufficient permissions to access this page.') );
+			$url = wp_nonce_url('admin.php?page=market360-presentation-details-page');
+			if (false === ($creds = request_filesystem_credentials($url, '', false, false, null) ) ) {
+				return; // stop processing here
+			}
+
+			if ( ! WP_Filesystem($creds) ) {
+				request_filesystem_credentials($url, '', true, false, null);
+				return;
+			}
+			global $wp_filesystem;
+			
+			if($wp_filesystem->is_dir($wp_filesystem->wp_content_dir() . 'market360/' . $results_from_db->dir)) 
+			{
+				$wp_filesystem->delete($wp_filesystem->wp_content_dir() . 'market360/' . $results_from_db->dir, true);
+				$wpdb->delete( $table_name, array( 'id' => $results_from_db->id ) );
+			}
+
+			$link = add_query_arg(
+				array(
+					'page' => 'market360-viewer',
+					'deleted' => '1'
+					),
+				admin_url('admin.php')
+				);
+			header("Location: $link");
+
+			/* Make sure that code below does not get executed when we redirect. */
+			exit;
 		}
+	}else{
+		$link = add_query_arg(
+			array(
+            'page' => 'market360-presentation-details-page', // as defined in the hidden page
+            'id' => $results_from_db->id,
+            'action' => 'delete'
+            ),
+			admin_url('admin.php')
+			);
 
-		$id = ( isset($_GET['id'] ) ) ? esc_attr( $_GET['id'] ) : false;
-		if( $id == false )
-		{
 			?>
 			<div class="wrap">
-				<h2> <?php echo __( 'No presentations found', 'market360-viewer' ); ?></h2>
+				<h2> <?php echo $results_from_db->name; ?></h2>
+
+				<script src="<?php echo  plugins_url(); ?>/market-360-viewer/engine/js/Main.js"></script>
+				<script src="<?php echo plugins_url(); ?>/market-360-viewer/engine/lib/jquery-1.10.1.min.js"></script>
+				<div id="presentationContainer<?php echo $results_from_db->id; ?>"></div>
+				<script>
+				app = new presentationLib.Main();
+				app.setPresentationPaths( "<?php echo  plugins_url(); ?>/market-360-viewer/engine/", "<?php echo $results_from_db->path; ?>" );
+				app.injectPresentation("presentationContainer<?php echo $results_from_db->id; ?>" , <?php echo $results_from_db->width; ?>, <?php echo $results_from_db->height; ?>);
+				</script>
+				<div style="background:#fff;padding:15px; margin-top:15px">
+					<form id="m360-details" method="POST">
+						<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
+						<h3 style="margin:0px"><?php echo __( 'Details', 'market360-viewer' ); ?></h3>
+						<hr/>
+						<p>
+							<label><?php echo __( 'Size:', 'market360-viewer' ); ?></label>
+							<input type="text" style="width:4em; margin-left:2em" name="p_width" value="<?php echo $results_from_db->width; ?>"> x <input type="text" style="width:4em" name="p_height" value="<?php echo $results_from_db->height; ?>">
+						</p>
+						<p>
+							<label>Shortcode:</label> <?php echo sprintf('[m360 id=%s w=%s h=%s]',$results_from_db->id,$results_from_db->width,$results_from_db->height); ?>
+						</p>
+						<p><input name="save" type="submit" class="button-primary button-large" value="<?php echo __( 'Update' ); ?>"></p>
+						<p><a class="submitdelete deletion" onclick="return showNotice.warn();" href="<?php echo wp_nonce_url( $link, 'delete_presentation_'.$results_from_db->id, 'm360_nonce' );?>"><?php echo __( 'Delete Permanently' ); ?></a></p>
+
+					</form>
+				</div>
 			</div>
 			<?php
-			return;
-		} 
-
-		$hidden_field_name = 'm360_submit_h';
-		global $wpdb;
-		$table_name = $wpdb->prefix . 'm360_presentations';
-		if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
-
-			$w = $_POST['p_width'];
-			$h = $_POST['p_height'];
-			$wpdb->update( 
-				$table_name, 
-				array( 
-					'width' => $w,
-					'height' => $h 
-					), 
-				array( 'ID' => $id )
-				);
 		}
-
-		
-		$results_from_db = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $id");
-		if (is_object($results_from_db)){
-
-			if( isset($_GET[ 'action' ]) && $_GET[ 'action' ] == 'delete' ) {
-				if (check_admin_referer( 'delete_presentation_'.$results_from_db->id, 'm360_nonce' ))
-				{
-					$url = wp_nonce_url('admin.php?page=market360-presentation-details-page');
-					if (false === ($creds = request_filesystem_credentials($url, '', false, false, null) ) ) {
-						return; // stop processing here
-					}
-
-					if ( ! WP_Filesystem($creds) ) {
-						request_filesystem_credentials($url, '', true, false, null);
-						return;
-					}
-					global $wp_filesystem;
-					
-					if($wp_filesystem->is_dir($wp_filesystem->wp_content_dir() . 'market360/' . $results_from_db->dir)) 
-					{
-						$wp_filesystem->delete($wp_filesystem->wp_content_dir() . 'market360/' . $results_from_db->dir, true);
-						$wpdb->delete( $table_name, array( 'id' => $results_from_db->id ) );
-					}
-
-					$link = add_query_arg(
-						array(
-							'page' => 'market360-viewer',
-							'deleted' => '1'
-							),
-						admin_url('admin.php')
-						);
-					header("Location: $link");
-
-					/* Make sure that code below does not get executed when we redirect. */
-					exit;
-				}
-			}else{
-				$link = add_query_arg(
-					array(
-	                'page' => 'market360-presentation-details-page', // as defined in the hidden page
-	                'id' => $results_from_db->id,
-	                'action' => 'delete'
-	                ),
-					admin_url('admin.php')
-					);
-
-					?>
-					<div class="wrap">
-						<h2> <?php echo $results_from_db->name; ?></h2>
-
-						<script src="<?php echo  plugins_url(); ?>/market-360-viewer/engine/js/Main.js"></script>
-						<script src="<?php echo plugins_url(); ?>/market-360-viewer/engine/lib/jquery-1.10.1.min.js"></script>
-						<div id="presentationContainer<?php echo $results_from_db->id; ?>"></div>
-						<script>
-						app = new presentationLib.Main();
-						app.setPresentationPaths( "<?php echo  plugins_url(); ?>/market-360-viewer/engine/", "<?php echo $results_from_db->path; ?>" );
-						app.injectPresentation("presentationContainer<?php echo $results_from_db->id; ?>" , <?php echo $results_from_db->width; ?>, <?php echo $results_from_db->height; ?>);
-						</script>
-						<div style="background:#fff;padding:15px; margin-top:15px">
-							<form id="m360-details" method="POST">
-								<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
-								<h3 style="margin:0px"><?php echo __( 'Details', 'market360-viewer' ); ?></h3>
-								<hr/>
-								<p>
-									<label><?php echo __( 'Size:', 'market360-viewer' ); ?></label>
-									<input type="text" style="width:4em; margin-left:2em" name="p_width" value="<?php echo $results_from_db->width; ?>"> x <input type="text" style="width:4em" name="p_height" value="<?php echo $results_from_db->height; ?>">
-								</p>
-								<p>
-									<label>Shortcode:</label> <?php echo sprintf('[m360 id=%s w=%s h=%s]',$results_from_db->id,$results_from_db->width,$results_from_db->height); ?>
-								</p>
-								<p><input name="save" type="submit" class="button-primary button-large" value="<?php echo __( 'Update' ); ?>"></p>
-								<p><a class="submitdelete deletion" onclick="return showNotice.warn();" href="<?php echo wp_nonce_url( $link, 'delete_presentation_'.$results_from_db->id, 'm360_nonce' );?>"><?php echo __( 'Delete Permanently' ); ?></a></p>
-
-							</form>
-						</div>
-					</div>
-					<?php
-				}
-			}else{
-				?>
-				<div class="wrap">
-					<h2> <?php echo __( 'No presentations found', 'market360-viewer' ); ?></h2>
-				</div>
-				<?php
-
-			}
-		}
-
-		function market360_viewer_shortcode_fn( $atts ){
-			$a = shortcode_atts( array(
-				'id' => '0',
-				'w' => '600',
-				'h' => '400',
-				), $atts );
-
-			global $wpdb;
-			$id = $a['id'];
-
-			$table_name = $wpdb->prefix . 'm360_presentations';
-			$results_from_db = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $id");
-
-			if (is_object($results_from_db)){
-				$retval = '';
-				// $retval .= '<script src="' . plugins_url() . '/market360-viewer/engine/js/Main.js"></script>';
-				// $retval .= '<script src="' . plugins_url() . '/market360-viewer/engine/lib/jquery-1.10.1.min.js"></script>';
-				$retval .= '<div id="presentationContainer' . $a['id'] . '"></div>';
-				$retval .= '<script>';
-				$retval .= '    app = new presentationLib.Main();';
-				$retval .= '    app.setPresentationPaths( "' . plugins_url() . '/market-360-viewer/engine/", "' . $results_from_db->path . '" );';
-				$retval .= '    app.injectPresentation("presentationContainer' . $a['id'] . '" , ' . $a['w'] .', ' . $a['h'] .');';
-				$retval .= '</script>';
-				return $retval;
-			}
-
-			return '';
-		}
-		add_shortcode( 'm360', 'market360_viewer_shortcode_fn' );
-
-		function market360_enqueue_script() {
-			wp_enqueue_script( 'market360engine', plugins_url() . '/market-360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
-		}
-
-		add_action( 'wp_enqueue_scripts', 'market360_enqueue_script' );
-
+	}else{
 		?>
+		<div class="wrap">
+			<h2> <?php echo __( 'No presentations found', 'market360-viewer' ); ?></h2>
+		</div>
+		<?php
+
+	}
+}
+
+function market360_viewer_shortcode_fn( $atts ){
+	$a = shortcode_atts( array(
+		'id' => '0',
+		'w' => '600',
+		'h' => '400',
+		), $atts );
+
+	global $wpdb;
+	$id = $a['id'];
+
+	$table_name = $wpdb->prefix . 'm360_presentations';
+	$results_from_db = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $id");
+
+	if (is_object($results_from_db)){
+		$retval = '';
+		// $retval .= '<script src="' . plugins_url() . '/market360-viewer/engine/js/Main.js"></script>';
+		// $retval .= '<script src="' . plugins_url() . '/market360-viewer/engine/lib/jquery-1.10.1.min.js"></script>';
+		$retval .= '<div id="presentationContainer' . $a['id'] . '"></div>';
+		$retval .= '<script>';
+		$retval .= '    app = new presentationLib.Main();';
+		$retval .= '    app.setPresentationPaths( "' . plugins_url() . '/market-360-viewer/engine/", "' . $results_from_db->path . '" );';
+		$retval .= '    app.injectPresentation("presentationContainer' . $a['id'] . '" , ' . $a['w'] .', ' . $a['h'] .');';
+		$retval .= '</script>';
+		return $retval;
+	}
+
+	return '';
+}
+add_shortcode( 'm360', 'market360_viewer_shortcode_fn' );
+
+function market360_enqueue_script() {
+	wp_enqueue_script( 'market360engine', plugins_url() . '/market-360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
+}
+
+add_action( 'wp_enqueue_scripts', 'market360_enqueue_script' );
+
+?>
