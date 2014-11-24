@@ -478,12 +478,12 @@ function upload_presentation_fn() {
 					<div class="wrap">
 						<h2> <?php echo $results_from_db->name; ?></h2>
 
-						<script src="<?php echo  plugins_url(); ?>/market360-viewer/engine/js/Main.js"></script>
-						<script src="<?php echo plugins_url(); ?>/market360-viewer/engine/lib/jquery-1.10.1.min.js"></script>
+						<script src="<?php echo  plugins_url(); ?>/market-360-viewer/engine/js/Main.js"></script>
+						<script src="<?php echo plugins_url(); ?>/market-360-viewer/engine/lib/jquery-1.10.1.min.js"></script>
 						<div id="presentationContainer<?php echo $results_from_db->id; ?>"></div>
 						<script>
 						app = new presentationLib.Main();
-						app.setPresentationPaths( "<?php echo  plugins_url(); ?>/market360-viewer/engine/", "<?php echo $results_from_db->path; ?>" );
+						app.setPresentationPaths( "<?php echo  plugins_url(); ?>/market-360-viewer/engine/", "<?php echo $results_from_db->path; ?>" );
 						app.injectPresentation("presentationContainer<?php echo $results_from_db->id; ?>" , <?php echo $results_from_db->width; ?>, <?php echo $results_from_db->height; ?>);
 						</script>
 						<div style="background:#fff;padding:15px; margin-top:15px">
