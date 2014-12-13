@@ -544,12 +544,6 @@ add_shortcode( 'm360', 'market360_viewer_shortcode_fn' );
 function market360_enqueue_script() {
 	wp_enqueue_script( 'market360engine', plugins_url() . '/market-360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
 }
-$adres='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
-$wynik= substr_count($adres, 'products-page');
-
-
-if($wynik==1){
 
 add_action( 'wp_enqueue_scripts', 'market360_enqueue_script' );
-}
 ?>
