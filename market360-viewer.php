@@ -321,8 +321,6 @@ function upload_presentation_fn() {
 		if (isset($_FILES["file"])){
 			$uploadedfile = $_FILES['file'];
 
-			if ($uploadedfile["type"] == "application/zip")
-			{
 				$dir = basename($uploadedfile["name"], ".zip") . '/';
 				if(!$wp_filesystem->is_dir($wp_filesystem->wp_content_dir() . 'market360/' . $dir )) 
 				{
@@ -367,9 +365,6 @@ function upload_presentation_fn() {
 				}else {
 					echo "This presentation is already uploaded.";
 				}
-			}else {
-				echo "Wrong file type. The file have to be .zip archive.";
-			}
 		}
 	}
 
@@ -549,7 +544,12 @@ add_shortcode( 'm360', 'market360_viewer_shortcode_fn' );
 function market360_enqueue_script() {
 	wp_enqueue_script( 'market360engine', plugins_url() . '/market-360-viewer/engine/js/Main.js', array('jquery'), '1.0.0', false );
 }
+$adres='http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+$wynik= substr_count($adres, 'products-page');
+
+
+if($wynik==1){
 
 add_action( 'wp_enqueue_scripts', 'market360_enqueue_script' );
-
+}
 ?>
